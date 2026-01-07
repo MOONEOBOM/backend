@@ -1,0 +1,11 @@
+SET NAMES utf8mb4;
+
+CREATE TABLE IF NOT EXISTS users (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  name VARCHAR(100) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO users (email, name)
+VALUES ('test@example.com', '홍길동');
