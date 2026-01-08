@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ureca.ureca.domain.user.dto.CreateUserRequest;
 import com.ureca.ureca.domain.user.dto.User;
 import com.ureca.ureca.domain.user.service.UserService;
+import com.ureca.ureca.global.common.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -19,12 +20,14 @@ public class UserController {
   private final UserService userService;
 
   @GetMapping("/{id}")
-  public User get(@PathVariable("id") Long id) {
-    return userService.getUser(id);
+  public ApiResponse<User> get(@PathVariable("id") Long id) {
+    User data = userService.getUser(id);
+    return ApiResponse.ok(data);
   }
 
   @PostMapping
-  public void create(@Valid @RequestBody CreateUserRequest req) {
+  public ApiResponse<Void> create(@Valid @RequestBody CreateUserRequest req) {
     userService.createUser(req.getEmail(), req.getName());
+    return ApiResponse.ok();
   }
 }
