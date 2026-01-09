@@ -13,6 +13,9 @@ import lombok.Setter;
 @Builder
 public class User {
   private Long id;
+  private String firebaseUid;
   private String email;
   private String name;
+  private String photoUrl;
+  private java.time.LocalDateTime lastLoginAt;
 }

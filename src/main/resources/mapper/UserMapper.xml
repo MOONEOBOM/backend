@@ -11,9 +11,26 @@
 		WHERE id = #{id}
 	</select>
 
-	<insert id="insertUser">
-		INSERT INTO users (email, name)
-		VALUES (#{email}, #{name})
-	</insert>
+  <select id="findByFirebaseUid" resultType="com.ureca.ureca.domain.user.dto.User">
+    SELECT id, firebase_uid AS firebaseUid, email, name, photo_url AS photoUrl, last_login_at AS lastLoginAt
+    FROM users
+    WHERE firebase_uid = #{firebaseUid}
+    LIMIT 1
+  </select>
+
+  <insert id="insertFirebaseUser" parameterType="com.ureca.ureca.domain.user.dto.User" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO users (firebase_uid, email, name, photo_url, created_at, last_login_at)
+    VALUES (#{firebaseUid}, #{email}, #{name}, #{photoUrl}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+  </insert>
+
+  <update id="updateFirebaseUser" parameterType="com.ureca.ureca.domain.user.dto.User">
+    UPDATE users
+    SET
+      email = #{email},
+      name = #{name},
+      photo_url = #{photoUrl},
+      last_login_at = CURRENT_TIMESTAMP
+    WHERE firebase_uid = #{firebaseUid}
+  </update>
 
 </mapper>
