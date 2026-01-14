@@ -53,6 +53,9 @@ public class AuthController {
       HttpServletResponse response) throws Exception {
     String idToken = extractBearerToken(authorization);
 
+    // 토큰검증
+    authService.verifyIdToken(idToken);
+
     String sessionCookie = authService.issueSessionCookie(idToken);
     CookieUtil.addSessionCookie(response, COOKIE_NAME, sessionCookie,
         authService.sessionMaxAgeSeconds());
