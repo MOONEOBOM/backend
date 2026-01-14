@@ -8,6 +8,8 @@ import com.google.firebase.auth.FirebaseToken;
 import com.ureca.ureca.domain.auth.service.AuthService;
 import com.ureca.ureca.domain.user.dto.User;
 import com.ureca.ureca.domain.user.service.UserService;
+import com.ureca.ureca.global.common.exception.BusinessException;
+import com.ureca.ureca.global.common.exception.ErrorCode;
 import com.ureca.ureca.global.common.response.ApiResponse;
 import com.ureca.ureca.global.util.CookieUtil;
 import jakarta.servlet.http.HttpServletResponse;
@@ -71,7 +73,7 @@ public class AuthController {
 
   private String extractBearerToken(String authorization) {
     if (authorization == null || !authorization.startsWith("Bearer ")) {
-      throw new IllegalArgumentException("Authorization Bearer 토큰이 필요합니다.");
+      throw new BusinessException(ErrorCode.UNAUTHORIZED, "Authorization Bearer 토큰이 필요합니다.");
     }
     return authorization.substring("Bearer ".length()).trim();
   }
