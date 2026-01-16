@@ -21,7 +21,30 @@ public class UserService {
   }
 
   @Transactional
-  public void createUser(String email, String name) {
-    userMapper.insertUser(email, name);
+  public User upsertFirebaseUser(String firebaseUid, String email, String name, String photoUrl) {
+    User existing = userMapper.findByFirebaseUid(firebaseUid);
+
+    if (existing == null) {
+      User created = User.builder().firebaseUid(firebaseUid).email(email).name(name)
+          .photoUrl(photoUrl).build();
+      userMapper.insertFirebaseUser(created);
+      return created;
+    }
+
+    // 기존 유저면 프로필 최신화(이름/사진/last_login)
+    User toUpdate = User.builder().id(existing.getId()).firebaseUid(firebaseUid)
+        .email(email != null ? email : existing.getEmail())
+        .name(name != null ? name : existing.getName()).photoUrl(photoUrl).build();
+
+    userMapper.updateFirebaseUser(toUpdate);
+    return userMapper.findByFirebaseUid(firebaseUid);
+  }
+
+  // /users/me 용
+  public User getByFirebaseUid(String firebaseUid) {
+    User user = userMapper.findByFirebaseUid(firebaseUid);
+    if (user == null)
+      throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+    return user;
   }
 }

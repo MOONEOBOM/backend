@@ -7,31 +7,61 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-@Configuration
-public class SecurityConfig {
+import com.google.firebase.auth.FirebaseAuth;
+import com.ureca.ureca.global.security.AuthenticationFilter;
 
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+
+@Configuration
+@RequiredArgsConstructor
+public class SecurityConfig {
+	
+	private final FirebaseAuth firebaseAuth;
+	
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
     http
-        // 개발 초기: REST 테스트 편하게
-        .csrf(csrf -> csrf.disable()).cors(Customizer.withDefaults())
-        .authorizeHttpRequests(auth -> auth.requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
-            .permitAll().requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-            .requestMatchers("/api/**").permitAll() // 모두 혀용 나중에 수정
-            .anyRequest().permitAll())
-
-        // 기본 /login 페이지도 꺼버리기 (원치 않으면)
-        .formLogin(form -> form.disable()).httpBasic(basic -> basic.disable());
+        .csrf(csrf -> csrf.disable())
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        //인증 실패/권한 실패를 401로 통일 
+        .exceptionHandling(ex -> ex
+            // 인증이 없을 때(Anonymous) 접근하면 401
+            .authenticationEntryPoint((request, response, authException) -> {
+              response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            })
+            // 인증은 됐지만 권한이 없을 때도(403 상황) 401로 통일
+            .accessDeniedHandler((request, response, accessDeniedException) -> {
+              response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            })
+        )
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(
+                "/api/v1/auth/**",
+                "/swagger-ui/**",
+                "/v3/api-docs/**",
+                "/swagger-ui.html"
+            ).permitAll()
+//          .requestMatchers("/api/**").permitAll() // 모두 혀용 나중에 수정
+            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+            .anyRequest().authenticated()
+        )
+        .addFilterBefore(
+            new AuthenticationFilter(firebaseAuth),
+            UsernamePasswordAuthenticationFilter.class
+        )
+        .formLogin(form -> form.disable())
+        .httpBasic(basic -> basic.disable());
 
     return http.build();
   }
 
-  // Next.js(3000)에서 호출 가능하도록 CORS 허용
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
