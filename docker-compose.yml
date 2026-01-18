@@ -10,6 +10,7 @@ services:
       - "3305:3306"
 
     environment:
+      TZ: Asia/Seoul
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
       MYSQL_USER: ${DB_USERNAME}
