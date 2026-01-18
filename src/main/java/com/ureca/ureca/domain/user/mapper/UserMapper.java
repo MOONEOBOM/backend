@@ -7,5 +7,13 @@ import com.ureca.ureca.domain.user.dto.User;
 @Mapper
 public interface UserMapper {
   User findById(@Param("id") Long id);
-  int insertUser(@Param("email") String email, @Param("name") String name);
+
+  // uid로 조회
+  User findByFirebaseUid(@Param("firebaseUid") String firebaseUid);
+
+  // 신규 유저 insert
+  int insertFirebaseUser(User user);
+
+  // 기존 유저 업데이트(이름/사진/last_login)
+  int updateFirebaseUser(User user);
 }
