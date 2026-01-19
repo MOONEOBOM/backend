@@ -1,11 +1,11 @@
 package com.ureca.ureca.global.external.clova;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -18,257 +18,294 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.springframework.stereotype.Component;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.ureca.ureca.global.common.exception.BusinessException;
+import com.ureca.ureca.global.common.exception.ErrorCode;
+import jakarta.annotation.PreDestroy;
 
 @Component
 public class ClovaSpeechClient {
 
-    private final ClovaSpeechProperties properties;
+  private final ClovaSpeechProperties properties;
+  private final CloseableHttpClient httpClient = HttpClients.createDefault();
+  private final Gson gson = new Gson();
 
-    private final CloseableHttpClient httpClient = HttpClients.createDefault();
-    private final Gson gson = new Gson();
+  public ClovaSpeechClient(ClovaSpeechProperties properties) {
+    this.properties = properties;
+  }
 
-    public ClovaSpeechClient(ClovaSpeechProperties properties) {
-        this.properties = properties;
+  @PreDestroy
+  public void cleanup() throws IOException {
+    if (httpClient != null) {
+      httpClient.close();
+    }
+  }
+
+  private Header[] headers() {
+    return new Header[] {new BasicHeader("Accept", "application/json"),
+        new BasicHeader("X-CLOVASPEECH-API-KEY", properties.getSecret()),};
+  }
+
+  public static class Boosting {
+    private String words;
+
+    public String getWords() {
+      return words;
     }
 
-    private Header[] headers() {
-        return new Header[] {
-            new BasicHeader("Accept", "application/json"),
-            new BasicHeader("X-CLOVASPEECH-API-KEY", properties.getSecret()),
-        };
+    public void setWords(String words) {
+      this.words = words;
+    }
+  }
+
+  public static class Diarization {
+    private Boolean enable = Boolean.FALSE;
+    private Integer speakerCountMin;
+    private Integer speakerCountMax;
+
+    public Boolean getEnable() {
+      return enable;
     }
 
-    	public static class Boosting {
-		private String words;
+    public void setEnable(Boolean enable) {
+      this.enable = enable;
+    }
 
-		public String getWords() {
-			return words;
-		}
+    public Integer getSpeakerCountMin() {
+      return speakerCountMin;
+    }
 
-		public void setWords(String words) {
-			this.words = words;
-		}
-	}
+    public void setSpeakerCountMin(Integer speakerCountMin) {
+      this.speakerCountMin = speakerCountMin;
+    }
 
-	public static class Diarization {
-		private Boolean enable = Boolean.FALSE;
-		private Integer speakerCountMin;
-		private Integer speakerCountMax;
+    public Integer getSpeakerCountMax() {
+      return speakerCountMax;
+    }
 
-		public Boolean getEnable() {
-			return enable;
-		}
+    public void setSpeakerCountMax(Integer speakerCountMax) {
+      this.speakerCountMax = speakerCountMax;
+    }
+  }
 
-		public void setEnable(Boolean enable) {
-			this.enable = enable;
-		}
+  public static class Sed {
+    private Boolean enable = Boolean.FALSE;
 
-		public Integer getSpeakerCountMin() {
-			return speakerCountMin;
-		}
+    public Boolean getEnable() {
+      return enable;
+    }
 
-		public void setSpeakerCountMin(Integer speakerCountMin) {
-			this.speakerCountMin = speakerCountMin;
-		}
+    public void setEnable(Boolean enable) {
+      this.enable = enable;
+    }
+  }
 
-		public Integer getSpeakerCountMax() {
-			return speakerCountMax;
-		}
+  public static class NestRequestEntity {
+    private String language = "ko-KR";
+    // completion optional, sync/async (응답 결과 반환 방식(sync/async) 설정, 필수 파라미터 아님)
+    private String completion = "sync";
+    // optional, used to receive the analyzed results (분석된 결과 조회 용도, 필수 파라미터 아님)
+    private String callback;
+    // optional, any data (임의의 Callback URL 값 입력, 필수 파라미터 아님)
+    private Map<String, Object> userdata;
+    private Boolean wordAlignment = Boolean.TRUE;
+    private Boolean fullText = Boolean.TRUE;
+    // boosting object array (키워드 부스팅 객체 배열)
+    private List<Boosting> boostings;
+    // comma separated words (쉼표 구분 키워드)
+    private String forbiddens;
+    private Diarization diarization;
+    private Sed sed;
 
-		public void setSpeakerCountMax(Integer speakerCountMax) {
-			this.speakerCountMax = speakerCountMax;
-		}
-	}
+    public Sed getSed() {
+      return sed;
+    }
 
-    public static class Sed {
-		private Boolean enable = Boolean.FALSE;
+    public void setSed(Sed sed) {
+      this.sed = sed;
+    }
 
-		public Boolean getEnable() {
-			return enable;
-		}
+    public String getLanguage() {
+      return language;
+    }
 
-		public void setEnable(Boolean enable) {
-			this.enable = enable;
-		}
-	}
+    public void setLanguage(String language) {
+      this.language = language;
+    }
 
-	public static class NestRequestEntity {
-		private String language = "ko-KR";
-		//completion optional, sync/async (응답 결과 반환 방식(sync/async) 설정, 필수 파라미터 아님)
-		private String completion = "sync";
-		//optional, used to receive the analyzed results (분석된 결과 조회 용도, 필수 파라미터 아님)
-		private String callback;
-		//optional, any data (임의의 Callback URL 값 입력, 필수 파라미터 아님)
-		private Map<String, Object> userdata;
-		private Boolean wordAlignment = Boolean.TRUE;
-		private Boolean fullText = Boolean.TRUE;
-		//boosting object array (키워드 부스팅 객체 배열)
-		private List<Boosting> boostings;
-		//comma separated words (쉼표 구분 키워드)
-		private String forbiddens;
-		private Diarization diarization;
-        private Sed sed;
+    public String getCompletion() {
+      return completion;
+    }
 
-        public Sed getSed() {
-			return sed;
-		}
+    public void setCompletion(String completion) {
+      this.completion = completion;
+    }
 
-		public void setSed(Sed sed) {
-			this.sed = sed;
-		}
+    public String getCallback() {
+      return callback;
+    }
 
-		public String getLanguage() {
-			return language;
-		}
+    public Boolean getWordAlignment() {
+      return wordAlignment;
+    }
 
-		public void setLanguage(String language) {
-			this.language = language;
-		}
+    public void setWordAlignment(Boolean wordAlignment) {
+      this.wordAlignment = wordAlignment;
+    }
 
-		public String getCompletion() {
-			return completion;
-		}
+    public Boolean getFullText() {
+      return fullText;
+    }
 
-		public void setCompletion(String completion) {
-			this.completion = completion;
-		}
+    public void setFullText(Boolean fullText) {
+      this.fullText = fullText;
+    }
 
-		public String getCallback() {
-			return callback;
-		}
+    public void setCallback(String callback) {
+      this.callback = callback;
+    }
 
-		public Boolean getWordAlignment() {
-			return wordAlignment;
-		}
+    public Map<String, Object> getUserdata() {
+      return userdata;
+    }
 
-		public void setWordAlignment(Boolean wordAlignment) {
-			this.wordAlignment = wordAlignment;
-		}
+    public void setUserdata(Map<String, Object> userdata) {
+      this.userdata = userdata;
+    }
 
-		public Boolean getFullText() {
-			return fullText;
-		}
+    public String getForbiddens() {
+      return forbiddens;
+    }
 
-		public void setFullText(Boolean fullText) {
-			this.fullText = fullText;
-		}
+    public void setForbiddens(String forbiddens) {
+      this.forbiddens = forbiddens;
+    }
 
-		public void setCallback(String callback) {
-			this.callback = callback;
-		}
+    public List<Boosting> getBoostings() {
+      return boostings;
+    }
 
-		public Map<String, Object> getUserdata() {
-			return userdata;
-		}
+    public void setBoostings(List<Boosting> boostings) {
+      this.boostings = boostings;
+    }
 
-		public void setUserdata(Map<String, Object> userdata) {
-			this.userdata = userdata;
-		}
+    public Diarization getDiarization() {
+      return diarization;
+    }
 
-		public String getForbiddens() {
-			return forbiddens;
-		}
+    public void setDiarization(Diarization diarization) {
+      this.diarization = diarization;
+    }
+  }
 
-		public void setForbiddens(String forbiddens) {
-			this.forbiddens = forbiddens;
-		}
+  /**
+   * recognize media using URL (외부 파일 URL로 음성 인식 요청)
+   * 
+   * @param url required, the media URL (필수 파라미터, 외부 파일 URL)
+   * @param nestRequestEntity optional (필수 파라미터가 아님)
+   * @return string (문자열 반환)
+   */
+  public String url(String url, NestRequestEntity nestRequestEntity) {
+    HttpPost httpPost = new HttpPost(properties.getInvokeUrl() + "/recognizer/url");
+    httpPost.setHeaders(headers());
+    Map<String, Object> body = new HashMap<>();
+    body.put("url", url);
+    body.put("language", nestRequestEntity.getLanguage());
+    body.put("completion", nestRequestEntity.getCompletion());
+    body.put("callback", nestRequestEntity.getCallback());
+    body.put("userdata", nestRequestEntity.getUserdata());
+    body.put("wordAlignment", nestRequestEntity.getWordAlignment());
+    body.put("fullText", nestRequestEntity.getFullText());
+    body.put("forbiddens", nestRequestEntity.getForbiddens());
+    body.put("boostings", nestRequestEntity.getBoostings());
+    body.put("diarization", nestRequestEntity.getDiarization());
+    body.put("sed", nestRequestEntity.getSed());
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      String json = objectMapper.writeValueAsString(body);
 
-		public List<Boosting> getBoostings() {
-			return boostings;
-		}
+      StringEntity httpEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
 
-		public void setBoostings(List<Boosting> boostings) {
-			this.boostings = boostings;
-		}
+      httpPost.setEntity(httpEntity);
+      return execute(httpPost);
 
-		public Diarization getDiarization() {
-			return diarization;
-		}
+    } catch (JsonProcessingException e) {
+      throw new IllegalStateException("Clova 요청 JSON 직렬화 실패", e);
+    }
+  }
 
-		public void setDiarization(Diarization diarization) {
-			this.diarization = diarization;
-		}
-	}
+  /**
+   * recognize media using Object Storage (네이버 클라우드 픒랫폼의 Object Storage 내 파일 URL로 음성 인식 요청)
+   * 
+   * @param dataKey required, the Object Storage key (필수 파라미터, Object Storage 키 값)
+   * @param nestRequestEntity optional (필수 파라미터가 아님)
+   * @return string (문자열 반환)
+   */
+  public String objectStorage(String dataKey, NestRequestEntity nestRequestEntity) {
+    HttpPost httpPost = new HttpPost(properties.getInvokeUrl() + "/recognizer/object-storage");
+    httpPost.setHeaders(headers());
+    Map<String, Object> body = new HashMap<>();
+    body.put("dataKey", dataKey);
+    body.put("language", nestRequestEntity.getLanguage());
+    body.put("completion", nestRequestEntity.getCompletion());
+    body.put("callback", nestRequestEntity.getCallback());
+    body.put("userdata", nestRequestEntity.getUserdata());
+    body.put("wordAlignment", nestRequestEntity.getWordAlignment());
+    body.put("fullText", nestRequestEntity.getFullText());
+    body.put("forbiddens", nestRequestEntity.getForbiddens());
+    body.put("boostings", nestRequestEntity.getBoostings());
+    body.put("diarization", nestRequestEntity.getDiarization());
+    body.put("sed", nestRequestEntity.getSed());
+    try {
+      ObjectMapper objectMapper = new ObjectMapper();
+      String json = objectMapper.writeValueAsString(body);
 
-	/**
-	 * recognize media using URL (외부 파일 URL로 음성 인식 요청)
-	 * @param url required, the media URL (필수 파라미터, 외부 파일 URL)
-	 * @param nestRequestEntity optional (필수 파라미터가 아님)
-	 * @return string (문자열 반환)
-	 */
-	public String url(String url, NestRequestEntity nestRequestEntity) {
-		HttpPost httpPost = new HttpPost(properties.getInvokeUrl() + "/recognizer/url");
-		httpPost.setHeaders(headers());
-		Map<String, Object> body = new HashMap<>();
-		body.put("url", url);
-		body.put("language", nestRequestEntity.getLanguage());
-		body.put("completion", nestRequestEntity.getCompletion());
-		body.put("callback", nestRequestEntity.getCallback());
-		body.put("userdata", nestRequestEntity.getUserdata());
-		body.put("wordAlignment", nestRequestEntity.getWordAlignment());
-		body.put("fullText", nestRequestEntity.getFullText());
-		body.put("forbiddens", nestRequestEntity.getForbiddens());
-		body.put("boostings", nestRequestEntity.getBoostings());
-		body.put("diarization", nestRequestEntity.getDiarization());
-        body.put("sed", nestRequestEntity.getSed());
-		HttpEntity httpEntity = new StringEntity(gson.toJson(body), ContentType.APPLICATION_JSON);
-		httpPost.setEntity(httpEntity);
-		return execute(httpPost);
-	}
+      StringEntity httpEntity = new StringEntity(json, ContentType.APPLICATION_JSON);
 
-	/**
-	 * recognize media using Object Storage (네이버 클라우드 픒랫폼의 Object Storage 내 파일 URL로 음성 인식 요청)
-	 * @param dataKey required, the Object Storage key (필수 파라미터, Object Storage 키 값)
-	 * @param nestRequestEntity optional (필수 파라미터가 아님)
-	 * @return string (문자열 반환)
-	 */
-	public String objectStorage(String dataKey, NestRequestEntity nestRequestEntity) {
-		HttpPost httpPost = new HttpPost(properties.getInvokeUrl()+"/recognizer/object-storage");
-		httpPost.setHeaders(headers());
-		Map<String, Object> body = new HashMap<>();
-		body.put("dataKey", dataKey);
-		body.put("language", nestRequestEntity.getLanguage());
-		body.put("completion", nestRequestEntity.getCompletion());
-		body.put("callback", nestRequestEntity.getCallback());
-		body.put("userdata", nestRequestEntity.getUserdata());
-		body.put("wordAlignment", nestRequestEntity.getWordAlignment());
-		body.put("fullText", nestRequestEntity.getFullText());
-		body.put("forbiddens", nestRequestEntity.getForbiddens());
-		body.put("boostings", nestRequestEntity.getBoostings());
-		body.put("diarization", nestRequestEntity.getDiarization());
-        body.put("sed", nestRequestEntity.getSed());
-		StringEntity httpEntity = new StringEntity(gson.toJson(body), ContentType.APPLICATION_JSON);
-		httpPost.setEntity(httpEntity);
-		return execute(httpPost);
-	}
+      httpPost.setEntity(httpEntity);
+      return execute(httpPost);
 
-	/**
-	 *
-	 * recognize media using a file (로컬 파일 업로드 후 음성 인식 요청)
-	 * @param file required, the media file (필수 파라미터, 로컬 파일)
-	 * @param nestRequestEntity optional (필수 파라미터가 아님)
-	 * @return string (문자열 반환)
-	 */
-	public String upload(File file, NestRequestEntity nestRequestEntity) {
-		HttpPost httpPost = new HttpPost(properties.getInvokeUrl() + "/recognizer/upload");
-		httpPost.setHeaders(headers());
-		HttpEntity httpEntity = MultipartEntityBuilder.create()
-			.addTextBody("params", gson.toJson(nestRequestEntity), ContentType.APPLICATION_JSON)
-			.addBinaryBody("media", file, ContentType.MULTIPART_FORM_DATA, file.getName())
-			.build();
-		httpPost.setEntity(httpEntity);
-		return execute(httpPost);
-	}
+    } catch (JsonProcessingException e) {
+      throw new IllegalStateException("Clova 요청 JSON 직렬화 실패", e);
+    }
+  }
 
-	private String execute(HttpPost httpPost) {
-		try (final CloseableHttpResponse httpResponse = httpClient.execute(httpPost)) {
-			final HttpEntity entity = httpResponse.getEntity();
-			return EntityUtils.toString(entity, StandardCharsets.UTF_8);
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
+  /**
+   *
+   * recognize media using a file (로컬 파일 업로드 후 음성 인식 요청)
+   * 
+   * @param file required, the media file (필수 파라미터, 로컬 파일)
+   * @param nestRequestEntity optional (필수 파라미터가 아님)
+   * @return string (문자열 반환)
+   */
+  public String upload(File file, NestRequestEntity nestRequestEntity) {
+    HttpPost httpPost = new HttpPost(properties.getInvokeUrl() + "/recognizer/upload");
+    httpPost.setHeaders(headers());
+    HttpEntity httpEntity = MultipartEntityBuilder.create()
+        .addTextBody("params", gson.toJson(nestRequestEntity), ContentType.APPLICATION_JSON)
+        .addBinaryBody("media", file, ContentType.MULTIPART_FORM_DATA, file.getName()).build();
+    httpPost.setEntity(httpEntity);
+    return execute(httpPost);
+  }
+
+  private String execute(HttpPost httpPost) {
+    try (final CloseableHttpResponse httpResponse = httpClient.execute(httpPost)) {
+      int statusCode = httpResponse.getStatusLine().getStatusCode();
+      if (statusCode < 200 || statusCode >= 300) {
+        String body = EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
+        throw new BusinessException(ErrorCode.CLOVA_API_ERROR,
+            "Clova API error: " + statusCode + " - " + body);
+      }
+      final HttpEntity entity = httpResponse.getEntity();
+      return EntityUtils.toString(entity, StandardCharsets.UTF_8);
+    } catch (Exception e) {
+      if (e instanceof BusinessException) {
+        throw (BusinessException) e;
+      }
+      throw new BusinessException(ErrorCode.CLOVA_API_ERROR, e.getMessage());
+    }
+  }
 }
 
