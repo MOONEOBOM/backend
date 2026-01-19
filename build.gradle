@@ -44,6 +44,10 @@ dependencies {
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 	implementation 'org.apache.httpcomponents:httpclient:4.5.13'
     implementation 'org.apache.httpcomponents:httpmime:4.5.13'
+    implementation platform('software.amazon.awssdk:bom:2.25.61')
+	implementation 'software.amazon.awssdk:s3'
+	implementation 'software.amazon.awssdk:auth'
+
 }
 
 tasks.withType(JavaCompile) {
