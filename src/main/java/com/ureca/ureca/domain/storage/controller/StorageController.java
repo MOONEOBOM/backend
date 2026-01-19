@@ -1,5 +1,6 @@
 package com.ureca.ureca.domain.storage.controller;
 
+import java.util.Set;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,13 +15,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StorageController {
 
+  private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of("audio/mpeg", // mp3
+      "audio/wav", // wav
+      "audio/x-wav" // wav (browser compatibility)
+  );
+
   private final StorageService storageService;
 
   @GetMapping("/presigned-url")
   public ResponseEntity<PresignResult> getUploadUrl(
       @RequestParam("contentType") String contentType) {
-    PresignResult response = storageService.generateUploadUrl(contentType);
 
+    if (!ALLOWED_CONTENT_TYPES.contains(contentType)) {
+      return ResponseEntity.badRequest().build();
+    }
+    PresignResult response = storageService.generateUploadUrl(contentType);
     return ResponseEntity.ok(response);
   }
 }
