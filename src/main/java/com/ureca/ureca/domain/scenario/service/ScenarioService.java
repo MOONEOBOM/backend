@@ -47,7 +47,7 @@ public class ScenarioService {
       throw new BusinessException(ErrorCode.SEGMENTS_NOT_FOUND);
     }
 
-    List<SttResultDto.SpeakerLineDto> lines = clova.getSegments().stream().map(seg -> {
+    List<SttResultDto.SpeakerLineDto> lines = segments.stream().map(seg -> {
       SttResultDto.SpeakerLineDto line = new SttResultDto.SpeakerLineDto();
 
       String speaker = (seg.getSpeaker() != null && seg.getSpeaker().getName() != null)
