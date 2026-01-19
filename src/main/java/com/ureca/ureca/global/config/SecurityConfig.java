@@ -46,7 +46,7 @@ public class SecurityConfig {
                 "/api/v1/auth/**",
                 "/swagger-ui/**",
                 "/v3/api-docs/**",
-                "/swagger-ui.html"
+                "/swagger-ui.html","/api/gemini/**"
             ).permitAll()
 //          .requestMatchers("/api/**").permitAll() // 모두 혀용 나중에 수정
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
