@@ -42,13 +42,13 @@ public class SecurityConfig {
             })
         )
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/api/v1/auth/**",
-                "/swagger-ui/**",
-                "/v3/api-docs/**",
-                "/swagger-ui.html","/api/gemini/**"
-            ).permitAll()
-//          .requestMatchers("/api/**").permitAll() // 모두 혀용 나중에 수정
+//            .requestMatchers(
+//                "/api/v1/auth/**",
+//                "/swagger-ui/**",
+//                "/v3/api-docs/**",
+//                "/swagger-ui.html",-
+//            ).permitAll()
+          .requestMatchers("/api/**").permitAll() // 모두 혀용 나중에 수정
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .anyRequest().authenticated()
         )

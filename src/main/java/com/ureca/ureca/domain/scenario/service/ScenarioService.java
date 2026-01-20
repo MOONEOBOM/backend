@@ -3,7 +3,10 @@ package com.ureca.ureca.domain.scenario.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ureca.ureca.domain.gemini.service.GeminiService;
 import com.ureca.ureca.domain.scenario.dto.ClovaResponse;
+import com.ureca.ureca.domain.scenario.dto.ScenarioRequestDto;
+import com.ureca.ureca.domain.scenario.dto.ScenarioResponseDto;
 import com.ureca.ureca.domain.scenario.dto.SttResultDto;
 import com.ureca.ureca.global.common.exception.BusinessException;
 import com.ureca.ureca.global.common.exception.ErrorCode;
@@ -17,6 +20,7 @@ public class ScenarioService {
 
   private final ClovaSpeechClient clovaSpeechClient;
   private final ObjectMapper objectMapper;
+  private final GeminiService geminiService;
 
   // public String transcribeByUpload(File file) {
   // NestRequestEntity request = new NestRequestEntity();
@@ -78,5 +82,12 @@ public class ScenarioService {
     } catch (Exception e) {
       throw new BusinessException(ErrorCode.CLOVA_RESPONSE_PARSE_FAILED);
     }
+  }
+  public ScenarioResponseDto createScenario(ScenarioRequestDto requestDto) {
+	  String category = requestDto.getCategoryKey();
+	  String combinedReasons = String.join(", ", requestDto.getReasonKey());
+
+	  return geminiService.scenarioCreate(category, combinedReasons);
+ 
   }
 }
