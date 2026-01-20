@@ -32,8 +32,14 @@ public enum ErrorCode {
                   HttpStatus.TOO_MANY_REQUESTS, "CLOVA_API_RATE_LIMIT", "STT 외부 서비스 호출 제한에 걸렸습니다."),
 
   CLOVA_RESPONSE_PARSE_FAILED(HttpStatus.BAD_GATEWAY, "CLOVA_RESPONSE_PARSE_FAILED",
-      "STT 응답을 처리할 수 없습니다.");
-
+      "STT 응답을 처리할 수 없습니다."),
+  
+  GEMINI_EMPTY_RESPONSE(HttpStatus.BAD_GATEWAY, "GEMINI_EMPTY_RESPONSE", "Gemini 응답이 비어 있습니다."),
+  GEMINI_RESPONSE_PARSE_FAILED(HttpStatus.BAD_GATEWAY, "GEMINI_RESPONSE_PARSE_FAILED", "JSON 파싱 실패로 Gemini 응답 데이터를 처리할 수 없습니다."),
+  
+	NULL_REFERENCE_ERROR(HttpStatus.BAD_REQUEST, "NULL_REFERENCE_ERROR", "참조된 요청 객체가 null입니다."),
+  
+  REQUIRED_FIELD_MISSING(HttpStatus.BAD_REQUEST, "REQUIRED_FIELD_MISSING", "필수 입력 필드값이 누락되었습니다.");
 
 
   private final HttpStatus status;

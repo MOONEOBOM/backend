@@ -84,10 +84,27 @@ public class ScenarioService {
     }
   }
   public ScenarioResponseDto createScenario(ScenarioRequestDto requestDto) {
-	  String category = requestDto.getCategoryKey();
-	  String combinedReasons = String.join(", ", requestDto.getReasonKey());
-
-	  return geminiService.scenarioCreate(category, combinedReasons);
+	
+		  if(requestDto == null) {
+		        throw new BusinessException(ErrorCode.NULL_REFERENCE_ERROR);
+		    }
+		  if(requestDto.getCategoryKey()==null || requestDto.getReasonKey()==null) {
+			  throw new BusinessException(ErrorCode.NULL_REFERENCE_ERROR);
+		  }
+		  if (requestDto.getCategoryKey().isBlank() || requestDto.getReasonKey().isEmpty()) {
+		        throw new BusinessException(ErrorCode.REQUIRED_FIELD_MISSING);
+		    }
+	  try {
+		  String category = requestDto.getCategoryKey();
+		  String combinedReasons = String.join(", ", requestDto.getReasonKey());
+		  return geminiService.scenarioCreate(category, combinedReasons);
+	  }
+	  catch(Exception e) {
+		  throw new BusinessException(ErrorCode.INTERNAL_ERROR);
+	  }
+	  
+	  
+	  
  
   }
 }

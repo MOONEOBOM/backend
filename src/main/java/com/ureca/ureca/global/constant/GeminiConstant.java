@@ -17,8 +17,8 @@ public final class GeminiConstant {
 	실제 상담이 어떻게 진행될지 모바일 채팅창 방식으로 시각화된 대화 시나리오를 작성합니다.
 
 ## 입력 데이터
-	- 상담 분야 (Category): {CONSULT_TYPES[key].label}
-	- 상담 사유 (Reason): {REASONS_BY_TYPE[key].label}
+	- 상담 분야 (Category): %s
+   	- 상담 사유 (Reason): %s
 
 ## 답변 가이드라인 및 시나리오 단계
 1. [도입]: "agent"의 "U+ 고객센터입니다. 어떤 점이 불편하신가요?"라는 질문에 "user"가 {REASONS_BY_TYPE[key].label}에 대해 답변하며 시작합니다.
@@ -52,9 +52,7 @@ public final class GeminiConstant {
 	    ...
 	  ]
 	}
-           이제 아래의 내용을 토대로 시나리오를 생성하세요.
-           —
-           %s""";
+    """;
 }
 
 

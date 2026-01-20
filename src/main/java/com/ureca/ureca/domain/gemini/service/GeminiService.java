@@ -10,6 +10,9 @@ import com.ureca.ureca.domain.gemini.dto.request.GeminiRequestDto;
 import com.ureca.ureca.domain.gemini.dto.response.GeminiResponseDto;
 import com.ureca.ureca.domain.scenario.dto.ScenarioResponseDto;
 import com.ureca.ureca.global.api.gemini.GeminiInterface;
+import com.ureca.ureca.global.common.exception.BusinessException;
+import com.ureca.ureca.global.common.exception.ErrorCode;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,7 @@ public class GeminiService {
     	// 프롬프트 작성
     	String prompt = String.format(SCENARIO_CREATE_PROMPT_TEMPLATE, categoryLabel, reasonLabel);
     	log.info("Gemini 요청 : {},사유: {}", categoryLabel,reasonLabel);
+    	
     	// Gemini 호출
         GeminiRequestDto geminiRequest = new GeminiRequestDto(prompt);
         GeminiResponseDto response = getCompletion(geminiRequest);
@@ -47,7 +51,10 @@ public class GeminiService {
                         .stream()
                         .findFirst()
                         .map(GeminiResponseDto.TextPart::getText))
-                .orElse(null);
+                .orElse("");
+        if(jsonResponse.isBlank()) {
+        	throw new BusinessException(ErrorCode.GEMINI_EMPTY_RESPONSE);
+        }
         
         jsonResponse = jsonResponse
                 .replaceAll("(?i)```json", "")
@@ -56,11 +63,14 @@ public class GeminiService {
 
         log.info("Gemini 응답 정제 후 JSON: {}", jsonResponse);
         
-        return objectMapper.readValue(jsonResponse, ScenarioResponseDto.class);
-        
+        try {
+            return objectMapper.readValue(jsonResponse, ScenarioResponseDto.class);
+        } catch (JsonProcessingException e) {
+            throw new BusinessException(ErrorCode.GEMINI_RESPONSE_PARSE_FAILED);
+        }
     	}catch(Exception e) {
-    		log.error("Gemini 서비스 처리 중 에러 발생: {}", e.getMessage());
-    		throw new RuntimeException("Gemini API 호출 실패", e);
+    		log.error("[Gemini Error] 예상치 못한 오류 발생: {}", e.getMessage(), e);
+    		throw new BusinessException(ErrorCode.INTERNAL_ERROR);
     	}
     }
 
