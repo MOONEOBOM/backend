@@ -99,9 +99,11 @@ public class ScenarioService {
 		  String combinedReasons = String.join(", ", requestDto.getReasonKey());
 		  return geminiService.scenarioCreate(category, combinedReasons);
 	  }
-	  catch(Exception e) {
-		  throw new BusinessException(ErrorCode.INTERNAL_ERROR);
-	  }
+	  catch (BusinessException e) {
+	  	  throw e;
+	    } catch (Exception e) {
+	  	  throw new BusinessException(ErrorCode.INTERNAL_ERROR);
+	    }
 	  
 	  
 	  

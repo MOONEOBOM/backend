@@ -65,9 +65,14 @@ public class GeminiService {
         
         try {
             return objectMapper.readValue(jsonResponse, ScenarioResponseDto.class);
-        } catch (JsonProcessingException e) {
+        } 
+        catch (JsonProcessingException e) {
             throw new BusinessException(ErrorCode.GEMINI_RESPONSE_PARSE_FAILED);
         }
+    	} 
+    	
+    	catch (BusinessException e) {
+    		   throw e;
     	}catch(Exception e) {
     		log.error("[Gemini Error] 예상치 못한 오류 발생: {}", e.getMessage(), e);
     		throw new BusinessException(ErrorCode.INTERNAL_ERROR);
