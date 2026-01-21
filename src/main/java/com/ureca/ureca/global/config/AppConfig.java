@@ -1,6 +1,6 @@
 package com.ureca.ureca.global.config;
 
-import com.ureca.ureca.domain.gemini.service.GeminiServiceImpl;
+import com.ureca.ureca.domain.gemini.service.GeminiService;
 import com.ureca.ureca.global.api.gemini.GeminiInterface;
 
 import lombok.extern.slf4j.Slf4j;
