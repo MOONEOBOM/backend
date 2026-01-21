@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
+import com.ureca.ureca.domain.chatbot.dto.ChatbotResponseDto;
 import com.ureca.ureca.domain.gemini.dto.request.GeminiRequestDto;
 import com.ureca.ureca.domain.gemini.dto.response.GeminiResponseDto;
 import com.ureca.ureca.domain.scenario.dto.ScenarioResponseDto;
@@ -33,52 +33,59 @@ public class GeminiService {
             .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     
     public ScenarioResponseDto scenarioCreate(String categoryLabel, String reasonLabel) {
-    	try {
-    	// 프롬프트 작성
     	String prompt = String.format(SCENARIO_CREATE_PROMPT_TEMPLATE, categoryLabel, reasonLabel);
     	log.info("Gemini 요청 : {},사유: {}", categoryLabel,reasonLabel);
-    	
-    	// Gemini 호출
-        GeminiRequestDto geminiRequest = new GeminiRequestDto(prompt);
-        GeminiResponseDto response = getCompletion(geminiRequest);
+    	return executeGeminiRequest(prompt, ScenarioResponseDto.class);
+    }
+    
+    public ChatbotResponseDto chatCreateAnswer(String chat) {
+    	String prompt = String.format(CHATBOT_PROMPT_TEMPLATE, chat);
+        log.info("Gemini 챗봇 질문: {}", chat);
         
-        // Gemini 응답 텍스트(JSON 문자열) 추출
-        String jsonResponse = response
-                .getCandidates()
-                .stream()
-                .findFirst()
-                .flatMap(candidate -> candidate.getContent().getParts()
-                        .stream()
-                        .findFirst()
-                        .map(GeminiResponseDto.TextPart::getText))
-                .orElse("");
-        if(jsonResponse.isBlank()) {
-        	throw new BusinessException(ErrorCode.GEMINI_EMPTY_RESPONSE);
-        }
-        
+        return executeGeminiRequest(prompt, ChatbotResponseDto.class);
+    }
+    
+    private <T> T executeGeminiRequest(String prompt, Class<T> responseType) {
+        try {
+            // 1. Gemini 호출
+            GeminiRequestDto geminiRequest = new GeminiRequestDto(prompt);
+            GeminiResponseDto response = getCompletion(geminiRequest);
+            
+            
+          // Gemini 응답 텍스트(JSON 문자열) 추출
+          String jsonResponse = response
+                  .getCandidates()
+                  .stream()
+                  .findFirst()
+                  .flatMap(candidate -> candidate.getContent().getParts()
+                          .stream()
+                          .findFirst()
+                          .map(GeminiResponseDto.TextPart::getText))
+                  .orElse("");
+          if(jsonResponse.isBlank()) {
+          	throw new BusinessException(ErrorCode.GEMINI_EMPTY_RESPONSE);
+          }
         jsonResponse = jsonResponse
                 .replaceAll("(?i)```json", "")
                 .replaceAll("```", "")
                 .trim();
 
         log.info("Gemini 응답 정제 후 JSON: {}", jsonResponse);
-        
         try {
-            return objectMapper.readValue(jsonResponse, ScenarioResponseDto.class);
+          return objectMapper.readValue(jsonResponse, responseType);
         } 
         catch (JsonProcessingException e) {
-            throw new BusinessException(ErrorCode.GEMINI_RESPONSE_PARSE_FAILED);
-        }
-    	} 
-    	
-    	catch (BusinessException e) {
-    		   throw e;
-    	}catch(Exception e) {
-    		log.error("[Gemini Error] 예상치 못한 오류 발생: {}", e.getMessage(), e);
-    		throw new BusinessException(ErrorCode.INTERNAL_ERROR);
-    	}
+          throw new BusinessException(ErrorCode.GEMINI_RESPONSE_PARSE_FAILED);
+        	}
+        } 
+    catch (BusinessException e) {
+		   throw e;
+	}catch(Exception e) {
+		log.error("[Gemini Error] 예상치 못한 오류 발생: {}", e.getMessage(), e);
+		throw new BusinessException(ErrorCode.INTERNAL_ERROR);
+	}
     }
-
+    
     private GeminiResponseDto getCompletion(GeminiRequestDto request) {
         return geminiInterface.getCompletion(GEMINI_MODEL, request);
     }
