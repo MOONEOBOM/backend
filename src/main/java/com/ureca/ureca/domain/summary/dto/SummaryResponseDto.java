@@ -13,7 +13,8 @@ public class SummaryResponseDto {
     @Data
     public static class KeywordCheck {
         private String keyword;  // 시나리오에서 뽑은 키워드 3개
-        private boolean is_spoken;  // 해당 키워드들이 얼마나 잘 나왔는지
+        @com.fasterxml.jackson.annotation.JsonProperty("is_spoken")  // 언더바(_) 대체 부분 추가
+        private boolean spoken;  // 해당 키워드들이 얼마나 잘 나왔는지
     }
 
     @Data

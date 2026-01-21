@@ -9,6 +9,7 @@ import com.ureca.ureca.domain.chatbot.dto.ChatbotResponseDto;
 import com.ureca.ureca.domain.gemini.dto.request.GeminiRequestDto;
 import com.ureca.ureca.domain.gemini.dto.response.GeminiResponseDto;
 import com.ureca.ureca.domain.scenario.dto.ScenarioResponseDto;
+import com.ureca.ureca.domain.summary.dto.SummaryResponseDto;
 import com.ureca.ureca.global.api.gemini.GeminiInterface;
 import com.ureca.ureca.global.common.exception.BusinessException;
 import com.ureca.ureca.global.common.exception.ErrorCode;
@@ -45,6 +46,26 @@ public class GeminiService {
         return executeGeminiRequest(prompt, ChatbotResponseDto.class);
     }
     
+ // 상담 요약 생성 (summary)
+    public SummaryResponseDto summaryCreate(String categoryLabel, String sttText, List<String> keywords) {
+        String inputData = String.format(
+            "상담 분야: %s\n전체 상담 텍스트: %s\n시나리오 핵심 키워드: %s",
+            categoryLabel, 
+            sttText, 
+            String.join(", ", keywords)
+        );
+
+        // 프롬프트를 통해 요약 시작 - 언더바(_) replace 대체 부분 추가
+//        String prompt = String.format(SCENARIO_SUMMARY_PROMPT_TEMPLATE, inputData);
+        String prompt = SCENARIO_SUMMARY_PROMPT_TEMPLATE
+                .replace("{{category_label}}", categoryLabel)
+                .replace("{{stt_text}}", sttText)
+                .replace("{{keywords}}", String.join(", ", keywords));
+        log.info("Gemini 상담 요약 요청 - 카테고리: {}", categoryLabel);
+        
+        return executeGeminiRequest(prompt, SummaryResponseDto.class);
+    }
+    
     private <T> T executeGeminiRequest(String prompt, Class<T> responseType) {
         try {
             // 1. Gemini 호출
@@ -68,6 +89,7 @@ public class GeminiService {
         jsonResponse = jsonResponse
                 .replaceAll("(?i)```json", "")
                 .replaceAll("```", "")
+                .replaceAll("\n", " ")
                 .trim();
 
         log.info("Gemini 응답 정제 후 JSON: {}", jsonResponse);
