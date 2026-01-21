@@ -1,8 +1,7 @@
 package com.ureca.ureca.domain.chatbot.service;
 
-import java.util.List;
+
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ureca.ureca.domain.chatbot.dto.ChatbotRequestDto;
 import com.ureca.ureca.domain.chatbot.dto.ChatbotResponseDto;
 import com.ureca.ureca.domain.gemini.service.GeminiService;
@@ -14,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ChatbotService {
 
-  private final ObjectMapper objectMapper;
   private final GeminiService geminiService;
   
   public ChatbotResponseDto createChatAnswer(ChatbotRequestDto requestDto) {
