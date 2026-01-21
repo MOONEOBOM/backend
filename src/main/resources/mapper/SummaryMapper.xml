@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ureca.ureca.domain.summary.mapper.SummaryMapper">
+
+  <!-- 컬럼 alias로 DTO 필드에 바로 매핑 -->
+  <select id="selectSummaries" resultType="com.ureca.ureca.domain.summary.dto.SummaryItem">
+    SELECT
+      id,
+      title,
+      DATE_FORMAT(created_at, '%Y-%m-%d') AS createdDate
+    FROM counsel_summary
+    WHERE user_id = #{userId}
+    <if test="cursor != null">
+      AND id <![CDATA[ < ]]> #{cursor}
+    </if>
+    ORDER BY id DESC
+    LIMIT #{limit}
+  </select>
+
+  <select id="selectRecentSummaries" resultType="com.ureca.ureca.domain.summary.dto.SummaryItem">
+    SELECT
+      id,
+      title,
+      DATE_FORMAT(created_at, '%Y-%m-%d') AS createdDate
+    FROM counsel_summary
+    WHERE user_id = #{userId}
+    ORDER BY id DESC
+    LIMIT #{limit}
+  </select>
+  
+    <!-- 상담내역 1건(요약) 조회 -->
+  <select id="selectSummaryDetail"
+          resultType="com.ureca.ureca.domain.summary.dto.SummaryDetailResponseDto">
+    SELECT
+      id,
+      title,
+      content,
+      DATE_FORMAT(created_at, '%Y-%m-%d') AS createdDate
+    FROM counsel_summary
+    WHERE id = #{id}
+      AND user_id = #{userId}
+  </select>
+
+  <!-- 해당 요약의 하이라이트 목록 -->
+  <select id="selectHighlights"
+          resultType="com.ureca.ureca.domain.summary.dto.HighlightItemDto">
+    SELECT
+      seq,
+      speaker,
+      text
+    FROM counsel_summary_highlight
+    WHERE summary_id = #{summaryId}
+    ORDER BY seq ASC
+  </select>
+
+</mapper>
