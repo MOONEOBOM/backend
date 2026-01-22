@@ -11,10 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ureca.ureca.domain.summary.dto.SummaryDetailResponseDto;
 import com.ureca.ureca.domain.summary.dto.SummaryListResponseDto;
 import com.ureca.ureca.domain.summary.dto.SummaryRequestDto;
-import com.ureca.ureca.domain.summary.dto.SummaryResponseDto;
 import com.ureca.ureca.domain.summary.service.SummaryService;
 import com.ureca.ureca.domain.user.dto.User;
 import com.ureca.ureca.domain.user.service.UserService;
+import com.ureca.ureca.global.common.exception.BusinessException;
+import com.ureca.ureca.global.common.exception.ErrorCode;
 import com.ureca.ureca.global.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -54,6 +55,9 @@ public class SummaryController {
 
       @Parameter(description = "조회 뷰 타입 (all | recent)", example = "all") @RequestParam(
           value = "view", required = false, defaultValue = "all") String view) {
+    if (authentication == null) {
+      throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+    }
 
     String firebaseUid = (String) authentication.getPrincipal(); // 필터에서 uid 넣어둠
     User user = userService.getByFirebaseUid(firebaseUid);
@@ -80,6 +84,10 @@ public class SummaryController {
       @Parameter(description = "중요 대화(bubble) 포함 여부", example = "true") @RequestParam(
           name = "bubble", defaultValue = "false") boolean includeHighlights) {
 
+    if (authentication == null) {
+      throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+    }
+
     String firebaseUid = (String) authentication.getPrincipal(); // 필터에서 uid 넣어둠
     User user = userService.getByFirebaseUid(firebaseUid);
 
@@ -89,13 +97,18 @@ public class SummaryController {
   }
 
   @PostMapping
-  public ApiResponse<SummaryResponseDto> generateSummary(
+  public ApiResponse<Void> generateSummary(@Parameter(hidden = true) Authentication authentication,
       @Valid @RequestBody SummaryRequestDto requestDto) {
     log.info("상담 요약 생성 요청 시작");
+    if (authentication == null) {
+      throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+    }
+    String firebaseUid = (String) authentication.getPrincipal(); // 필터에서 uid 넣어둠
+    User user = userService.getByFirebaseUid(firebaseUid);
 
-    SummaryResponseDto response = summaryService.createSummary(requestDto);
+    summaryService.createSummary(user.getId(), requestDto);
 
-    return ApiResponse.ok("상담 요약 생성 성공", response);
+    return ApiResponse.ok();
   }
 
 }

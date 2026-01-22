@@ -1,9 +1,12 @@
 package com.ureca.ureca.domain.summary.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.ureca.ureca.domain.gemini.service.GeminiService;
+import com.ureca.ureca.domain.summary.dto.CounselSummary;
+import com.ureca.ureca.domain.summary.dto.CounselSummaryHighlight;
 import com.ureca.ureca.domain.summary.dto.HighlightItemDto;
 import com.ureca.ureca.domain.summary.dto.SummaryDetailResponseDto;
 import com.ureca.ureca.domain.summary.dto.SummaryItem;
@@ -87,7 +90,8 @@ public class SummaryService {
    * @param requestDto
    * @return
    */
-  public SummaryResponseDto createSummary(SummaryRequestDto requestDto) {
+  @Transactional
+  public void createSummary(Long userId, SummaryRequestDto requestDto) {
 
     // 데이터 있나없나 확인
     if (requestDto == null) {
@@ -99,7 +103,7 @@ public class SummaryService {
       throw new BusinessException(ErrorCode.REQUIRED_FIELD_MISSING);
     }
     for (SummaryRequestDto.ChatMessage msg : requestDto.getMessages()) {
-      if (msg == null || msg.getSpeaker() == null || msg.getSpeaker().isBlank()
+      if (msg == null || msg.getRole() == null || msg.getRole().isBlank()
           || msg.getMessage() == null || msg.getMessage().isBlank()) {
         throw new BusinessException(ErrorCode.REQUIRED_FIELD_MISSING);
       }
@@ -110,7 +114,39 @@ public class SummaryService {
       Object summaryconversation = requestDto.getMessages();
 
       log.info("[SummaryService] 요약 생성 요청 시작 (분야 제외)");
-      return geminiService.summaryCreate(summaryconversation);
+      SummaryResponseDto geminiResponse = geminiService.summaryCreate(summaryconversation);
+
+      // 상담요약 저장용 내부dto
+      CounselSummary summary = new CounselSummary();
+      summary.setUserId(userId);
+      summary.setTitle(geminiResponse.getTitle());
+      summary.setContent(geminiResponse.getSummary());
+
+      // 상담요약 저장 및 id 받기
+      summaryMapper.insertSummary(summary);
+      Long summaryId = summary.getId();
+
+      // 핵심 버블 저장용 내부dto
+      List<CounselSummaryHighlight> highlightsToInsert = new ArrayList<>();
+      List<SummaryResponseDto.CoreChat> coreChats = geminiResponse.getCorechat();
+
+      if (coreChats != null && !coreChats.isEmpty()) {
+        int seq = 1; // UNIQUE(summary_id, seq)라서 1부터 쭉 증가 추천
+        for (SummaryResponseDto.CoreChat c : coreChats) {
+          CounselSummaryHighlight h = new CounselSummaryHighlight();
+          h.setSummaryId(summaryId);
+          h.setSeq(seq++);
+
+          h.setSpeaker(c.getSpeaker());
+          h.setText(c.getMessage());
+
+          log.info("core_chat speakerRaw='{}'", c.getSpeaker());
+          highlightsToInsert.add(h);
+        }
+      }
+      // 핵심 버블 저장
+      summaryMapper.insertHighlights(highlightsToInsert);
+
     }
 
     catch (BusinessException e) {

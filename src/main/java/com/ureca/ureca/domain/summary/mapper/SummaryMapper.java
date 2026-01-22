@@ -3,6 +3,8 @@ package com.ureca.ureca.domain.summary.mapper;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import com.ureca.ureca.domain.summary.dto.CounselSummary;
+import com.ureca.ureca.domain.summary.dto.CounselSummaryHighlight;
 import com.ureca.ureca.domain.summary.dto.HighlightItemDto;
 import com.ureca.ureca.domain.summary.dto.SummaryDetailResponseDto;
 import com.ureca.ureca.domain.summary.dto.SummaryItem;
@@ -15,12 +17,19 @@ public interface SummaryMapper {
       @Param("cursor") Long cursor);
 
   // 최근 조회
-  List<SummaryItem> selectRecentSummaries(@Param("userId") Long userId, @Param("limit") Integer limit);
+  List<SummaryItem> selectRecentSummaries(@Param("userId") Long userId,
+      @Param("limit") Integer limit);
 
   // 상담내용 하나보기
   SummaryDetailResponseDto selectSummaryDetail(@Param("userId") Long userId, @Param("id") Long id);
 
   // 처음 요약된페이지일떄 하이라이트버블 체크
   List<HighlightItemDto> selectHighlights(@Param("summaryId") Long summaryId);
+
+  // 상담요약 저장
+  int insertSummary(CounselSummary summary);
+
+  // 상담요약 하이라이트 버블 저장
+  int insertHighlights(@Param("highlights") List<CounselSummaryHighlight> highlights);
 }
 

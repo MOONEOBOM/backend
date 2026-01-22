@@ -49,11 +49,45 @@
           resultType="com.ureca.ureca.domain.summary.dto.HighlightItemDto">
     SELECT
       seq,
-      speaker,
-      text
+      speaker AS role,
+      text AS message
     FROM counsel_summary_highlight
     WHERE summary_id = #{summaryId}
     ORDER BY seq ASC
   </select>
+  
+  <!-- 상담요약 저장 -->
+    <insert id="insertSummary"
+            parameterType="com.ureca.ureca.domain.summary.dto.CounselSummary"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO counsel_summary (
+            user_id,
+            title,
+            content
+        ) VALUES (
+            #{userId},
+            #{title},
+            #{content}
+        )
+    </insert>
+
+    <!-- 상담요약 핵심 버블 저장 -->
+    <insert id="insertHighlights">
+        INSERT INTO counsel_summary_highlight (
+            summary_id,
+            seq,
+            speaker,
+            text
+        ) VALUES
+        <foreach collection="highlights" item="item" separator=",">
+            (
+                #{item.summaryId},
+                #{item.seq},
+                #{item.speaker},
+                #{item.text}
+            )
+        </foreach>
+    </insert>
 
 </mapper>
