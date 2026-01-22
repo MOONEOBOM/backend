@@ -106,12 +106,10 @@ public final class GeminiConstant {
 	{
 	  "title": "상담 요약 제목",
 	  "summary": "전체 상담 내용을 요약한 문장",
-	  "core_chat": {
-	    "counselor": "상담사",
-	    "counselormessage": "상담사의 핵심 답변 또는 제안 내용",
-	    "customer": "고객",
-	    "customermessage": "고객의 최종 동의 또는 핵심 질문 내용"
-	  }
+	  "core_chat": [
+	    { "speaker": "상담사", "message": "상담사의 핵심 대사" },
+	    { "speaker": "고객", "message": "고객의 핵심 대사" }
+	  ]
 	}
     """;
 
