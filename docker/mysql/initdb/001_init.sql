@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS counsel_summary_highlight (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   summary_id BIGINT NOT NULL,
   seq INT NOT NULL,
-  speaker ENUM('mooneo','user') NOT NULL,
+  speaker ENUM('agent','user') NOT NULL,
   text TEXT NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

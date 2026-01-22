@@ -11,6 +11,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class HighlightItemDto {
   private Integer seq;
-  private String speaker; // "mooneo" | "user"
+  private String speaker; // "agent" | "user"
   private String text;
 }
