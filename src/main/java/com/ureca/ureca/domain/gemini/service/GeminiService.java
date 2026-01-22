@@ -90,7 +90,6 @@ public class GeminiService {
         jsonResponse = jsonResponse
                 .replaceAll("(?i)```json", "")
                 .replaceAll("```", "")
-                .replaceAll("\n", " ")
                 .trim();
 
         log.info("Gemini 응답 정제 후 JSON: {}", jsonResponse);
