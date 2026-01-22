@@ -25,6 +25,9 @@ public enum ErrorCode {
       "해당 음성 파일을 찾을 수 없습니다."), SEGMENTS_NOT_FOUND(HttpStatus.NOT_FOUND, "SEGMENTS_NOT_FOUND",
           "해당 음성 파일에 세그먼트를 찾을 수 없습니다."),
 
+  //Summary
+  SUMMARY_NOT_FOUND(HttpStatus.NOT_FOUND, "SUMMARY_NOT_FOUND","해당 상담 요약 정보가 없습니다."),
+  
   CLOVA_API_ERROR(HttpStatus.BAD_GATEWAY, "CLOVA_API_ERROR",
       "STT 외부 서비스 호출에 실패했습니다."), CLOVA_API_TIMEOUT(HttpStatus.GATEWAY_TIMEOUT, "CLOVA_API_TIMEOUT",
           "STT 외부 서비스 응답이 지연되고 있습니다."), CLOVA_API_UNAUTHORIZED(HttpStatus.BAD_GATEWAY,
@@ -33,7 +36,10 @@ public enum ErrorCode {
 
   CLOVA_RESPONSE_PARSE_FAILED(HttpStatus.BAD_GATEWAY, "CLOVA_RESPONSE_PARSE_FAILED",
       "STT 응답을 처리할 수 없습니다."),
+  //
   
+  
+  //Gemini
   GEMINI_EMPTY_RESPONSE(HttpStatus.BAD_GATEWAY, "GEMINI_EMPTY_RESPONSE", "Gemini 응답이 비어 있습니다."),
   GEMINI_RESPONSE_PARSE_FAILED(HttpStatus.BAD_GATEWAY, "GEMINI_RESPONSE_PARSE_FAILED", "JSON 파싱 실패로 Gemini 응답 데이터를 처리할 수 없습니다."),
   

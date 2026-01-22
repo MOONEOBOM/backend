@@ -8,6 +8,9 @@ import com.ureca.ureca.domain.summary.dto.SummaryDetailResponseDto;
 import com.ureca.ureca.domain.summary.dto.SummaryItem;
 import com.ureca.ureca.domain.summary.dto.SummaryListResponseDto;
 import com.ureca.ureca.domain.summary.mapper.SummaryMapper;
+import com.ureca.ureca.global.common.exception.BusinessException;
+import com.ureca.ureca.global.common.exception.ErrorCode;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -22,8 +25,13 @@ public class SummaryService {
   public SummaryListResponseDto getSummaries(Long userId, Integer limit, Long cursor, String view) {
     String safeView = (view == null) ? "all" : view;
 
-    // 기본 limit 정책
-    int pageSize = (limit != null) ? limit : (safeView.equals("recent") ? 2 : 10);
+ // 기본 limit 정책
+    int pageSize;
+    if (safeView.equals("recent")) {
+    	pageSize = 2;
+    } else {
+    	pageSize = (limit != null) ? limit : 10;
+    }
 
     List<SummaryItem> items;
 
@@ -45,13 +53,16 @@ public class SummaryService {
     return SummaryListResponseDto.builder().items(items).nextCursor(nextCursor).build();
   }
 
+  /**
+   * 상담 요약 자세히 보기
+   * includeHighlights=true 시 핵심 대화 포함
+   * */
   @Transactional(readOnly = true)
   public SummaryDetailResponseDto getSummaryDetail(Long userId, Long id,
       boolean includeHighlights) {
     SummaryDetailResponseDto dto = summaryMapper.selectSummaryDetail(userId, id);
     if (dto == null) {
-      // 너희 프로젝트 예외 포맷 있으면 그걸로 바꿔도 됨
-      throw new IllegalArgumentException("Summary not found");
+      throw new BusinessException(ErrorCode.SUMMARY_NOT_FOUND);
     }
 
     if (includeHighlights) {
