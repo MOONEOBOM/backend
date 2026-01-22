@@ -46,24 +46,35 @@ public class GeminiService {
         return executeGeminiRequest(prompt, ChatbotResponseDto.class);
     }
     
- // 상담 요약 생성 (summary)
-    public SummaryResponseDto summaryCreate(String categoryLabel, String sttText, List<String> keywords) {
-        String inputData = String.format(
-            "상담 분야: %s\n전체 상담 텍스트: %s\n시나리오 핵심 키워드: %s",
-            categoryLabel, 
-            sttText, 
-            String.join(", ", keywords)
-        );
+    // 상담 요약 생성 (summary)
+    public SummaryResponseDto summaryCreate(String categoryLabel, Object conversationData) {
 
-        // 프롬프트를 통해 요약 시작 - 언더바(_) replace 대체 부분 추가
-//        String prompt = String.format(SCENARIO_SUMMARY_PROMPT_TEMPLATE, inputData);
-        String prompt = SCENARIO_SUMMARY_PROMPT_TEMPLATE
-                .replace("{{category_label}}", categoryLabel)
-                .replace("{{stt_text}}", sttText)
-                .replace("{{keywords}}", String.join(", ", keywords));
-        log.info("Gemini 상담 요약 요청 - 카테고리: {}", categoryLabel);
-        
-        return executeGeminiRequest(prompt, SummaryResponseDto.class);
+//        // 프롬프트를 통해 요약 시작 - 언더바(_) replace 대체 부분 추가
+////        String prompt = String.format(SCENARIO_SUMMARY_PROMPT_TEMPLATE, inputData);
+//        String prompt = SCENARIO_SUMMARY_PROMPT_TEMPLATE
+//                .replace("{{category_label}}", categoryLabel)
+//                .replace("{{stt_text}}", sttText);
+//        log.info("Gemini 상담 요약 요청 - 카테고리: {}", categoryLabel);
+//        
+//        return executeGeminiRequest(prompt, SummaryResponseDto.class);
+    	
+    	try {
+            // 1) 입력받은 JSON 객체를 문자열로 변환 (Gemini 프롬프트에 넣는 용도)
+    		String conversationJson = objectMapper.writeValueAsString(conversationData);
+
+            // 2) 프롬프트 템플릿 치환
+    		String prompt = SCENARIO_SUMMARY_PROMPT_TEMPLATE
+//    		        .replace("{{category_label}}", categoryLabel != null ? categoryLabel : "")
+    		        .replace("{{conversation}}", conversationJson);
+            
+            log.info("Gemini 상담 요약 요청 - 분야: {}", categoryLabel);
+            
+            return executeGeminiRequest(prompt, SummaryResponseDto.class);
+            
+        } catch (JsonProcessingException e) {
+            log.error("[Gemini Error] 입력 데이터 직렬화 실패: {}", e.getMessage());
+            throw new BusinessException(ErrorCode.INVALID_REQUEST);
+        }
     }
     
     private <T> T executeGeminiRequest(String prompt, Class<T> responseType) {
@@ -97,15 +108,16 @@ public class GeminiService {
           return objectMapper.readValue(jsonResponse, responseType);
         } 
         catch (JsonProcessingException e) {
-          throw new BusinessException(ErrorCode.GEMINI_RESPONSE_PARSE_FAILED);
-        	}
-        } 
-    catch (BusinessException e) {
-		   throw e;
-	}catch(Exception e) {
-		log.error("[Gemini Error] 예상치 못한 오류 발생: {}", e.getMessage(), e);
-		throw new BusinessException(ErrorCode.INTERNAL_ERROR);
-	}
+            throw new BusinessException(ErrorCode.GEMINI_RESPONSE_PARSE_FAILED);
+        }
+    }
+        catch (BusinessException e) {
+            throw e;
+        }
+        catch (Exception e) {
+            log.error("[Gemini Error] 예상치 못한 오류 발생: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.INTERNAL_ERROR);
+        }
     }
     
     private GeminiResponseDto getCompletion(GeminiRequestDto request) {

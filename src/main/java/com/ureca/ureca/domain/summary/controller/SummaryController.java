@@ -24,7 +24,7 @@ public class SummaryController{
 	
 	private final SummaryService summaryService;
 	
-	@PostMapping("/summarize") 
+	@PostMapping
     public ApiResponse<SummaryResponseDto> generateSummary(@Valid @RequestBody SummaryRequestDto requestDto) {
         log.info("상담 요약 생성 요청 시작");
         

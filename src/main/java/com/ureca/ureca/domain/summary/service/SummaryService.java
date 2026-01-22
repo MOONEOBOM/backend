@@ -24,27 +24,22 @@ public class SummaryService {
      */
     public SummaryResponseDto createSummary(SummaryRequestDto requestDto) {
     	
+    	// 데이터 있나없나 확인
     	if (requestDto == null) {
     		throw new BusinessException(ErrorCode.NULL_REFERENCE_ERROR);
 	    }
         
     	// 필수 내용들이 있는지 확인 (누락 여부 확인)
-        if (requestDto.getCategory_label() == null || requestDto.getCategory_label().isBlank() ||
-            requestDto.getStt_text() == null || requestDto.getStt_text().isBlank() ||
-            requestDto.getKeywords() == null || requestDto.getKeywords().isEmpty()) {
-          
-        	throw new BusinessException(ErrorCode.REQUIRED_FIELD_MISSING);
+    	if (requestDto.getMessages() == null || requestDto.getMessages().isEmpty()) {
+            throw new BusinessException(ErrorCode.REQUIRED_FIELD_MISSING);
         }
         
-        try {
-            // GeminiService 호출 -> 요약 시작
-            String category = requestDto.getCategory_label();
-            String sttText = requestDto.getStt_text();
-            List<String> keywords = requestDto.getKeywords();
+    	// Gemini 불러서 상담 내용 요약 시작
+    	try {
+    		Object summaryconversation = requestDto.getMessages();
             
-            log.info("[SummaryService] 요약 생성 요청 - 분야: {}", category);
-            
-            return geminiService.summaryCreate(category, sttText, keywords);
+            log.info("[SummaryService] 요약 생성 요청 시작 (분야 제외)");
+            return geminiService.summaryCreate("", summaryconversation);
         }
         
 	    catch (BusinessException e) {
@@ -52,7 +47,7 @@ public class SummaryService {
 	    }
 	    catch (Exception e) {
 	        // 에러
-	        log.error("[Summary Error] 예상치 못한 오류 발생: {}", e.getMessage(), e);
+	    	log.error("[SummaryService Error] : {}", e.getMessage());
 	        throw new BusinessException(ErrorCode.INTERNAL_ERROR);
 	    }
     }
