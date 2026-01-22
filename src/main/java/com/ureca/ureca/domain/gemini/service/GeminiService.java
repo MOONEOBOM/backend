@@ -48,15 +48,6 @@ public class GeminiService {
     
     // 상담 요약 생성 (summary)
     public SummaryResponseDto summaryCreate(String categoryLabel, Object conversationData) {
-
-//        // 프롬프트를 통해 요약 시작 - 언더바(_) replace 대체 부분 추가
-////        String prompt = String.format(SCENARIO_SUMMARY_PROMPT_TEMPLATE, inputData);
-//        String prompt = SCENARIO_SUMMARY_PROMPT_TEMPLATE
-//                .replace("{{category_label}}", categoryLabel)
-//                .replace("{{stt_text}}", sttText);
-//        log.info("Gemini 상담 요약 요청 - 카테고리: {}", categoryLabel);
-//        
-//        return executeGeminiRequest(prompt, SummaryResponseDto.class);
     	
     	try {
             // 1) 입력받은 JSON 객체를 문자열로 변환 (Gemini 프롬프트에 넣는 용도)
@@ -64,7 +55,6 @@ public class GeminiService {
 
             // 2) 프롬프트 템플릿 치환
     		String prompt = SCENARIO_SUMMARY_PROMPT_TEMPLATE
-//    		        .replace("{{category_label}}", categoryLabel != null ? categoryLabel : "")
     		        .replace("{{conversation}}", conversationJson);
             
             log.info("Gemini 상담 요약 요청 - 분야: {}", categoryLabel);
