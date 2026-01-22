@@ -3,11 +3,15 @@ package com.ureca.ureca.domain.summary.controller;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.ureca.ureca.domain.summary.dto.SummaryDetailResponseDto;
 import com.ureca.ureca.domain.summary.dto.SummaryListResponseDto;
+import com.ureca.ureca.domain.summary.dto.SummaryRequestDto;
+import com.ureca.ureca.domain.summary.dto.SummaryResponseDto;
 import com.ureca.ureca.domain.summary.service.SummaryService;
 import com.ureca.ureca.domain.user.dto.User;
 import com.ureca.ureca.domain.user.service.UserService;
@@ -15,12 +19,17 @@ import com.ureca.ureca.global.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+
 
 @Tag(name = "Summary", description = "상담 요약 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/summary")
+@Slf4j
 public class SummaryController {
 
   private final UserService userService;
@@ -79,4 +88,15 @@ public class SummaryController {
     return ApiResponse.ok("요약내용 상세보기 조회 성공", response);
   }
 
+  @PostMapping
+  public ApiResponse<SummaryResponseDto> generateSummary(
+      @Valid @RequestBody SummaryRequestDto requestDto) {
+    log.info("상담 요약 생성 요청 시작");
+
+    SummaryResponseDto response = summaryService.createSummary(requestDto);
+
+    return ApiResponse.ok("상담 요약 생성 성공", response);
+  }
+
 }
+
