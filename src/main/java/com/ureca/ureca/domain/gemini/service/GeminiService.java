@@ -47,7 +47,7 @@ public class GeminiService {
     }
     
     // 상담 요약 생성 (summary)
-    public SummaryResponseDto summaryCreate(String categoryLabel, Object conversationData) {
+    public SummaryResponseDto summaryCreate(Object conversationData) {
     	
     	try {
             // 1) 입력받은 JSON 객체를 문자열로 변환 (Gemini 프롬프트에 넣는 용도)
@@ -57,7 +57,7 @@ public class GeminiService {
     		String prompt = SCENARIO_SUMMARY_PROMPT_TEMPLATE
     		        .replace("{{conversation}}", conversationJson);
             
-            log.info("Gemini 상담 요약 요청 - 분야: {}", categoryLabel);
+    		log.info("Gemini 상담 요약 요청");
             
             return executeGeminiRequest(prompt, SummaryResponseDto.class);
             

@@ -45,7 +45,7 @@ public class SummaryService {
     		Object summaryconversation = requestDto.getMessages();
             
             log.info("[SummaryService] 요약 생성 요청 시작 (분야 제외)");
-            return geminiService.summaryCreate("", summaryconversation);
+            return geminiService.summaryCreate(summaryconversation);
         }
         
 	    catch (BusinessException e) {
