@@ -33,7 +33,13 @@ public class SummaryService {
     	if (requestDto.getMessages() == null || requestDto.getMessages().isEmpty()) {
             throw new BusinessException(ErrorCode.REQUIRED_FIELD_MISSING);
         }
-        
+    	for (SummaryRequestDto.ChatMessage msg : requestDto.getMessages()) {
+    		if (msg == null || msg.getSpeaker() == null || msg.getSpeaker().isBlank()
+    				|| msg.getMessage() == null || msg.getMessage().isBlank()) {
+    			throw new BusinessException(ErrorCode.REQUIRED_FIELD_MISSING);
+    		}
+    	}
+    	
     	// Gemini 불러서 상담 내용 요약 시작
     	try {
     		Object summaryconversation = requestDto.getMessages();

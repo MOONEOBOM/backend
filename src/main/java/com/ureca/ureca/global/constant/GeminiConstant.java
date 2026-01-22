@@ -91,7 +91,7 @@ public final class GeminiConstant {
         - 말투: LG U+의 브랜드 이미지에 맞게 정중하고 상냥하며 긍정적인 톤앤매너를 유지합니다.
         - 길이 제한: `summary` 섹션은 카드 UI 크기를 고려하여 최대 4줄을 넘지 않게 작성합니다.
         - 모든 텍스트 값 내부에 실제 줄바꿈(Enter)을 절대 포함하지 마세요. 줄바꿈이 필요하다면 한 칸 공백으로 대체하세요. (JSON 파싱 에러 방지용)
-        - JSON 키 값(`title`, `summary`, `core_chat`, `counselor_msg`, `customer_msg`)을 엄격히 준수하세요.
+        - JSON 키 값(`title`, `summary`, `core_chat`, `counselor`, `customer`)을 엄격히 준수하세요.
         - `core_chat` 내부의 `counselor`와 `customer`는 반드시 `speaker`와 `text` 필드를 가진 객체여야 합니다.
 		- `speaker` 값은 "상담사" 또는 "고객"으로 고정합니다.
 
@@ -100,8 +100,8 @@ public final class GeminiConstant {
    - title: 상담의 핵심 주제를 나타내는 한 줄 제목 (예: 로밍 요금제 문의 및 가입 안내)
    - summary: 상담 전체 내용을 3~4문장으로 논리적으로 요약 (존댓말 사용)
    - core_chat: 상담의 성패를 가른 가장 중요한 대화 2개
-      - counselor_msg: 상담사의 핵심 답변 또는 제안
-      - customer_msg: 고객의 최종 동의 또는 핵심 질문
+      - counselor: 상담사의 핵심 답변 또는 제안
+      - customer: 고객의 최종 동의 또는 핵심 질문
 	{
 	  "title": "상담 요약 제목",
 	  "summary": "전체 상담 내용을 요약한 문장",
