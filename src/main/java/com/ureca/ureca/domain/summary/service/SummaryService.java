@@ -91,7 +91,7 @@ public class SummaryService {
    * @return
    */
   @Transactional
-  public void createSummary(Long userId, SummaryRequestDto requestDto) {
+  public Long createSummary(Long userId, SummaryRequestDto requestDto) {
 
     // 데이터 있나없나 확인
     if (requestDto == null) {
@@ -146,6 +146,8 @@ public class SummaryService {
       }
       // 핵심 버블 저장
       summaryMapper.insertHighlights(highlightsToInsert);
+
+      return summaryId;
 
     }
 

@@ -97,7 +97,7 @@ public class SummaryController {
   }
 
   @PostMapping
-  public ApiResponse<Void> generateSummary(@Parameter(hidden = true) Authentication authentication,
+  public ApiResponse<Long> generateSummary(@Parameter(hidden = true) Authentication authentication,
       @Valid @RequestBody SummaryRequestDto requestDto) {
     log.info("상담 요약 생성 요청 시작");
     if (authentication == null) {
@@ -106,9 +106,9 @@ public class SummaryController {
     String firebaseUid = (String) authentication.getPrincipal(); // 필터에서 uid 넣어둠
     User user = userService.getByFirebaseUid(firebaseUid);
 
-    summaryService.createSummary(user.getId(), requestDto);
+    Long summaryId = summaryService.createSummary(user.getId(), requestDto);
 
-    return ApiResponse.ok();
+    return ApiResponse.ok("상담 요약 내용 저장완료", summaryId);
   }
 
 }
