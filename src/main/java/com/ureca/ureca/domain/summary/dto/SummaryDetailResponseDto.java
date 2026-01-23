@@ -1,5 +1,6 @@
 package com.ureca.ureca.domain.summary.dto;
 
+import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +15,7 @@ public class SummaryDetailResponseDto {
   private Long id;
   private String title;
   private String content;
-  private String createdDate; // "YYYY-MM-DD"
+  private LocalDate createdDate; // "YYYY-MM-DD"
 
   // includeHighlights=false면 빈 배열
   private List<HighlightItemDto> highlights;

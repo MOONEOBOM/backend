@@ -10,7 +10,7 @@
     SELECT
       id,
       title,
-      DATE_FORMAT(created_at, '%Y-%m-%d') AS createdDate
+      DATE(created_at) AS createdDate
     FROM counsel_summary
     WHERE user_id = #{userId}
     <if test="cursor != null">
@@ -24,7 +24,7 @@
     SELECT
       id,
       title,
-      DATE_FORMAT(created_at, '%Y-%m-%d') AS createdDate
+      DATE(created_at) AS createdDate
     FROM counsel_summary
     WHERE user_id = #{userId}
     ORDER BY id DESC
@@ -38,7 +38,7 @@
       id,
       title,
       content,
-      DATE_FORMAT(created_at, '%Y-%m-%d') AS createdDate
+      DATE(created_at) AS createdDate
     FROM counsel_summary
     WHERE id = #{id}
       AND user_id = #{userId}

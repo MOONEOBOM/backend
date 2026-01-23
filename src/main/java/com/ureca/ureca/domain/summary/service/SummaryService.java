@@ -38,7 +38,7 @@ public class SummaryService {
     if (safeView.equals("recent")) {
       pageSize = 2;
     } else {
-      pageSize = (limit != null) ? limit : 10;
+      pageSize = (limit != null && limit > 0) ? limit : 10;
     }
 
     List<SummaryItem> items;
