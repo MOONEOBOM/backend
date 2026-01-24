@@ -17,5 +17,6 @@ public class User {
   private String email;
   private String name;
   private String photoUrl;
+  private boolean firstLogin;
   private java.time.LocalDateTime lastLoginAt;
 }

@@ -16,4 +16,7 @@ public interface UserMapper {
 
   // 기존 유저 업데이트(이름/사진/last_login)
   int updateFirebaseUser(User user);
+  
+  // 온보딩 완료 업데이트
+  int completeFirstLogin(@Param("userId") Long userId);
 }
