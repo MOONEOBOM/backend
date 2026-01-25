@@ -54,8 +54,11 @@ public class UserService {
     int updated = userMapper.completeFirstLogin(userId);
 
     if (updated == 0) {
-      // userId가 없거나(비정상) 업데이트가 안 된 경우
-    	throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+    	// 이미 완료된 경우를 허용: 존재 여부만 확인
+    	if (userMapper.findById(userId) == null) {
+    		throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+    	}
+    	return;
     }
   }
 }
