@@ -2,6 +2,7 @@ package com.ureca.ureca.domain.user.controller;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,4 +25,15 @@ public class UserController {
     
     return ApiResponse.ok("유저 조회 성공",user);
   }
+  
+  @PatchMapping("/complete")
+  public ApiResponse<Void> updateFirstLogin(Authentication authentication) {
+	 String firebaseUid = (String) authentication.getPrincipal(); // 필터에서 uid 넣어둠
+	 User user = userService.getByFirebaseUid(firebaseUid);
+	 
+	 userService.completeFirstLogin(user.getId());
+	  
+	 return ApiResponse.ok();
+  }
+  
 }

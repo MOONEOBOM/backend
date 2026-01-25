@@ -12,7 +12,7 @@
 	</select>
 
   <select id="findByFirebaseUid" resultType="com.ureca.ureca.domain.user.dto.User">
-    SELECT id, firebase_uid AS firebaseUid, email, name, photo_url AS photoUrl, last_login_at AS lastLoginAt
+    SELECT id, firebase_uid AS firebaseUid, email, name, photo_url AS photoUrl,is_first_login AS firstLogin, last_login_at AS lastLoginAt
     FROM users
     WHERE firebase_uid = #{firebaseUid}
     LIMIT 1
@@ -32,5 +32,12 @@
       last_login_at = CURRENT_TIMESTAMP
     WHERE firebase_uid = #{firebaseUid}
   </update>
+  
+    <update id="completeFirstLogin">
+    UPDATE users
+    SET
+      is_first_login = FALSE
+    WHERE id = #{userId}
+  	</update>
 
 </mapper>

@@ -26,7 +26,7 @@ public class AuthController {
   private final UserService userService;
 
   @PostMapping("/login")
-  public ApiResponse<Void> login(@RequestHeader("Authorization") String authorization,
+  public ApiResponse<User> login(@RequestHeader("Authorization") String authorization,
       HttpServletResponse response) throws Exception {
     String idToken = extractBearerToken(authorization);
 
@@ -45,8 +45,7 @@ public class AuthController {
 
     // 3) DB upsert
     User user = userService.upsertFirebaseUser(firebaseUid, email, name, photoUrl);
-
-    return ApiResponse.ok("로그인 성공", null);
+    return ApiResponse.ok("로그인 성공", user);
   }
 
   // 401 뜰 때 프론트가 호출해서 새 쿠키 받는 용도

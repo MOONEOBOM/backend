@@ -28,7 +28,7 @@ public class UserService {
       User created = User.builder().firebaseUid(firebaseUid).email(email).name(name)
           .photoUrl(photoUrl).build();
       userMapper.insertFirebaseUser(created);
-      return created;
+      return userMapper.findByFirebaseUid(firebaseUid);
     }
 
     // 기존 유저면 프로필 최신화(이름/사진/last_login)
@@ -46,5 +46,19 @@ public class UserService {
     if (user == null)
       throw new BusinessException(ErrorCode.USER_NOT_FOUND);
     return user;
+  }
+  
+  @Transactional
+  public void completeFirstLogin(Long userId) {
+
+    int updated = userMapper.completeFirstLogin(userId);
+
+    if (updated == 0) {
+    	// 이미 완료된 경우를 허용: 존재 여부만 확인
+    	if (userMapper.findById(userId) == null) {
+    		throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+    	}
+    	return;
+    }
   }
 }
