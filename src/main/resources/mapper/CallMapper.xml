@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ureca.ureca.domain.call.mapper.CallMapper">
+
+    <select id="findCallCounselList"
+            resultType="com.ureca.ureca.domain.call.dto.CallCounselListResponseDto">
+        SELECT
+            id,
+            preview_text   AS previewText,
+            started_at     AS startedAt
+        FROM call_counsel
+        ORDER BY started_at DESC
+    </select>
+    
+  <select id="findMessagesByCallId"
+          parameterType="long"
+          resultType="com.ureca.ureca.domain.call.dto.CallMessagesResponseDto">
+    SELECT
+      id,
+      seq,
+      role,
+      message,
+      created_at AS createdAt
+    FROM call_counsel_messages
+    WHERE call_counsel_id = #{callId}
+    ORDER BY seq ASC
+  </select>
+  
+      <update id="updateStartedAtToNow">
+        UPDATE call_counsel
+        SET started_at = NOW()
+        WHERE id = 1
+    </update>
+
+</mapper>
