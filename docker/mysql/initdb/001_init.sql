@@ -44,3 +44,33 @@ CREATE TABLE IF NOT EXISTS counsel_summary_highlight (
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
+  
+ 
+  CREATE TABLE IF NOT EXISTS call_counsel (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  started_at TIMESTAMP NOT NULL,
+  preview_text VARCHAR(500) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_call_counsel_started_at (started_at)
+)ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS call_counsel_messages (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+  call_counsel_id BIGINT NOT NULL,  
+  seq INT NOT NULL,
+  role VARCHAR(20) NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  UNIQUE KEY uk_call_seq (call_counsel_id, seq),
+
+  CONSTRAINT fk_call_messages_call
+    FOREIGN KEY (call_counsel_id) REFERENCES call_counsel(id)
+    ON DELETE CASCADE
+)ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+  
