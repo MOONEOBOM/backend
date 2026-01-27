@@ -30,6 +30,6 @@ public class CallController {
       @PathVariable("callId") Long callId) {
 
     List<CallMessagesResponseDto> response = callService.getMessages(callId);
-    return ApiResponse.ok("통화목록 조회 완료", response);
+    return ApiResponse.ok("통화상담 메시지 조회 완료", response);
   }
 }

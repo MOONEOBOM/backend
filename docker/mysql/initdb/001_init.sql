@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS counsel_summary_highlight (
   COLLATE=utf8mb4_unicode_ci;
   
  
-  CREATE TABLE call_counsel (
+  CREATE TABLE IF NOT EXISTS call_counsel (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   started_at TIMESTAMP NOT NULL,
   preview_text VARCHAR(500) NOT NULL,
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS counsel_summary_highlight (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE call_counsel_messages (
+CREATE TABLE IF NOT EXISTS call_counsel_messages (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
 
   call_counsel_id BIGINT NOT NULL,  
@@ -66,7 +66,6 @@ CREATE TABLE call_counsel_messages (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
   UNIQUE KEY uk_call_seq (call_counsel_id, seq),
-  KEY idx_call_seq (call_counsel_id, seq),
 
   CONSTRAINT fk_call_messages_call
     FOREIGN KEY (call_counsel_id) REFERENCES call_counsel(id)
@@ -75,12 +74,3 @@ CREATE TABLE call_counsel_messages (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
   
-ALTER TABLE call_counsel
-  MODIFY preview_text VARCHAR(500)
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
-
-ALTER TABLE call_counsel_messages
-  MODIFY message TEXT
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
